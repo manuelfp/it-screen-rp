@@ -1,5 +1,6 @@
 package com.devcodes.training.itscreen;
 
+import com.devcodes.training.itscreen.services.CommandService;
 import com.devcodes.training.itscreen.utils.ImageTool;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -44,6 +45,9 @@ public class ItScreenApplication implements CommandLineRunner {
 	@Value("${file.upload-dir}")
 	private String pathImage;
 
+	@Autowired
+	private CommandService commandService;
+
 	@KafkaListener(topics = "${kafka.topic.own}")
 	public void listenWithHeaders(@Payload String message) {
 		System.out.println("Received Message.");
@@ -60,6 +64,8 @@ public class ItScreenApplication implements CommandLineRunner {
 		File outPutFile = new File(pathImageComplete);
 		try {
 			ImageIO.write(image, imgType, outPutFile);
+			String response = commandService.doExec(outPutFile.getName());
+			sendMessage("response:"+response);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
